@@ -1,57 +1,44 @@
 package com.example.tom_and_jerry_part1;
 
-import android.media.MediaActionSound;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
-
+import androidx.cardview.widget.CardView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
-
-import java.util.Arrays;
 import java.util.Random;
 
 public class Activity_Game extends AppCompatActivity {
 
     private final int ROWS = 6;
     private final int COLS = 3;
-    private final int TIMER_DELAY_MS = 800; //1 sec
+    private final int TIMER_DELAY_MS = 650;
     private final int START_PLAYER_POSITION = COLS / 2;
-
     private AppCompatImageView[]    game_IMG_hearts;
     private AppCompatImageView[]    game_IMG_player;
     private AppCompatImageView[]    game_IMG_player_catch;
     private AppCompatImageView[][] game_IMG_obstacles;
     private MaterialButton          game_BTN_right;
     private MaterialButton          game_BTN_left;
+    private MaterialButton          game_BTN_playAgain;
+    private CardView                game_CV_gameOverBoard;
     private AppCompatImageView game_IMG_back;
     private Handler timerHandler;
     private Runnable timerRunnable;
-//    private MaterialButton game_BTN_playAgain;
-    private int iconsVisibilities[][] = new int[ROWS][COLS];
+    private int[][] iconsVisibilities = new int[ROWS][COLS];
     private int playerPosition;
     private int lives = 3;
     private int timeCount = 0;
     private Random randomObstacle;
     private int randomCol = 0;
-
-    //todo: delete
-//    private MediaActionSound sound = new MediaActionSound();
-//            sound.play(MediaActionSound.START_VIDEO_RECORDING);
-
-
-
+    private boolean isFirstGame = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-
         startViews();
         My_Signal.init(this);
         My_Screen_Utils.hideSystemUI(this);
@@ -61,16 +48,6 @@ public class Activity_Game extends AppCompatActivity {
         startNewGame();
     }
 
-    private void gameOver(){
-        stopTimer();
-        //TODO: finish logic
-        Toast.makeText(this, "Game Over", Toast.LENGTH_SHORT).show();
-        game_BTN_right.setEnabled(false);
-        game_BTN_left.setEnabled(false);
-   //     game_BTN_playAgain.setVisibility(View.VISIBLE);
-    }
-
-    //_________________________________IMPORTANT_____________________________________________
     @Override
     protected void onResume() {
         super.onResume();
@@ -82,7 +59,6 @@ public class Activity_Game extends AppCompatActivity {
         super.onPause();
         stopTimer();
     }
-    //_________________________________IMPORTANT_____________________________________________
 
     //timer
     private void startTimer() {
@@ -111,11 +87,17 @@ public class Activity_Game extends AppCompatActivity {
         checkIfCatch();
     }
 
+    private void resetLastRow() {
+        for(int i = 0; i< COLS; i++) {
+            game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
+            if(playerPosition == i)
+                game_IMG_player[i].setVisibility(View.VISIBLE);
+        }
+    }
+
     private void shiftDownRows() {
         for (int i = ROWS-1; i > 0; i--) {
-            for (int j = 0; j < COLS; j++) {
-                iconsVisibilities[i][j] = iconsVisibilities[i-1][j];
-            }
+            System.arraycopy(iconsVisibilities[i - 1], 0, iconsVisibilities[i], 0, COLS);
         }
     }
 
@@ -141,14 +123,6 @@ public class Activity_Game extends AppCompatActivity {
         }
     }
 
-    private void resetLastRow() {
-        for(int i = 0; i< COLS; i++) {
-            game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
-            if(playerPosition == i)
-                game_IMG_player[i].setVisibility(View.VISIBLE);
-        }
-    }
-
     private void checkIfCatch() {
         for (int i = 0; i < COLS; i++) {
             if (iconsVisibilities[ROWS-1][i] == 1 && playerPosition == i) {
@@ -161,10 +135,6 @@ public class Activity_Game extends AppCompatActivity {
                     gameOver();
             }
         }
-    }
-
-    private void vibrateOnCatch() {
-        My_Signal.getInstance().vibrate(500);
     }
 
     private void reduceLive() {
@@ -190,11 +160,31 @@ public class Activity_Game extends AppCompatActivity {
         My_Signal.getInstance().sound(R.raw.msc_tom_catch_jerry);
     }
 
+    private void vibrateOnCatch() {
+        My_Signal.getInstance().vibrate(400);
+    }
+
     private void startNewGame() {
+        My_Signal.getInstance().sound(R.raw.msc_start_game);
+        hideGameOverBoard();
         initLives();
         initPlayerPosition();
-        resetMatrixOfIcons(); //reset the matrix to 0, and jerry to the middle
-        //TODO: soundOfNewGame
+        resetMatrixOfIcons();
+        game_BTN_right.setEnabled(true);
+        game_BTN_left.setEnabled(true);
+        if(!isFirstGame)
+            startTimer();
+        else
+            isFirstGame = false;
+    }
+
+    private void hideGameOverBoard() {
+        game_CV_gameOverBoard.setVisibility(View.INVISIBLE);
+    }
+
+    private void initLives() {
+        lives = 3;
+        updateLivesUI();
     }
 
     private void initPlayerPosition() {
@@ -202,25 +192,21 @@ public class Activity_Game extends AppCompatActivity {
         setPlayerVisibility();
     }
 
+    private void setPlayerVisibility() {
+        for(int i=0; i<COLS; i++)
+            if (i == playerPosition)
+                game_IMG_player[i].setVisibility(View.VISIBLE);
+            else
+                game_IMG_player[i].setVisibility(View.INVISIBLE);
+    }
+
     private void resetMatrixOfIcons() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
-                if (iconsVisibilities[i][j] == 1)
-                    game_IMG_obstacles[i][j].setVisibility(View.VISIBLE);
+                iconsVisibilities[i][j] = 0;
             }
         }
-        for (int i = 0; i < COLS; i++) {
-            if(playerPosition == i)
-                game_IMG_player[i].setVisibility(View.VISIBLE);
-        }
     }
-
-    private void initLives() {
-        lives = 3;
-        updateLivesUI();
-      //  game_BTN_playAgain.setVisibility(View.GONE);
-    }
-
 
     private void initBackground() {
         Glide
@@ -241,12 +227,12 @@ public class Activity_Game extends AppCompatActivity {
                 .into(game_IMG_player_catch[2]);
     }
 
-
     private void startViews() {
         game_IMG_back = findViewById(R.id.game_IMG_back);
         game_BTN_right = findViewById(R.id.game_BTN_right);
         game_BTN_left  = findViewById(R.id.game_BTN_left);
-       // game_BTN_playAgain = findViewById(R.id.game_BTN_playAgain);
+        game_BTN_playAgain = findViewById(R.id.game_BTN_playAgain);
+        game_CV_gameOverBoard = findViewById(R.id.game_CV_gameOverBoard);
 
         game_IMG_hearts = new AppCompatImageView[]{
                 findViewById(R.id.game_IMG_heart1),
@@ -274,12 +260,12 @@ public class Activity_Game extends AppCompatActivity {
                 {findViewById(R.id.game_IMG_5_1), findViewById(R.id.game_IMG_5_2), findViewById(R.id.game_IMG_5_3)},
                 {findViewById(R.id.game_IMG_player_tom_1), findViewById(R.id.game_IMG_player_tom_2), findViewById(R.id.game_IMG_player_tom_3)}
         };
-
     }
 
     private void initButtonsListeners() {
         game_BTN_left.setOnClickListener(v -> moveLeft());
         game_BTN_right.setOnClickListener(v -> moveRight());
+        game_BTN_playAgain.setOnClickListener(v -> startNewGame());
     }
 
     private void moveLeft() {
@@ -287,6 +273,7 @@ public class Activity_Game extends AppCompatActivity {
             return;
         playerPosition--;
         setPlayerVisibility();
+        checkIfCatch();
     }
 
     private void moveRight() {
@@ -294,14 +281,18 @@ public class Activity_Game extends AppCompatActivity {
             return;
         playerPosition++;
         setPlayerVisibility();
+        checkIfCatch();
     }
 
-    private void setPlayerVisibility() {
-        for(int i=0; i<COLS; i++)
-            if (i == playerPosition)
-                game_IMG_player[i].setVisibility(View.VISIBLE);
-            else
-                game_IMG_player[i].setVisibility(View.INVISIBLE);
+    private void gameOver(){
+        stopTimer();
+        My_Signal.getInstance().sound(R.raw.msc_game_over);
+        resetMatrixOfIcons();
+        updateVisibilityOfIcons();
+        for(int i = 0; i< COLS; i++)
+            game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
+        game_CV_gameOverBoard.setVisibility(View.VISIBLE);
+        game_BTN_right.setEnabled(false);
+        game_BTN_left.setEnabled(false);
     }
 }
-
