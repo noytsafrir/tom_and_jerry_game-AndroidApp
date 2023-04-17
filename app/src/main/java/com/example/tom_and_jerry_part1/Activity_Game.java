@@ -14,26 +14,25 @@ public class Activity_Game extends AppCompatActivity {
 
     private final int ROWS = 6;
     private final int COLS = 3;
-    private final int TIMER_DELAY_MS = 650;
-    private final int START_PLAYER_POSITION = COLS / 2;
+    private final int TIMER_DELAY_MS = 550;
     private AppCompatImageView[]    game_IMG_hearts;
     private AppCompatImageView[]    game_IMG_player;
     private AppCompatImageView[]    game_IMG_player_catch;
-    private AppCompatImageView[][] game_IMG_obstacles;
+    private AppCompatImageView[][]  game_IMG_obstacles;
     private MaterialButton          game_BTN_right;
     private MaterialButton          game_BTN_left;
     private MaterialButton          game_BTN_playAgain;
     private CardView                game_CV_gameOverBoard;
-    private AppCompatImageView game_IMG_back;
+    private AppCompatImageView      game_IMG_back;
     private Handler timerHandler;
     private Runnable timerRunnable;
-    private int[][] iconsVisibilities = new int[ROWS][COLS];
-    private int playerPosition;
-    private int lives = 3;
     private int timeCount = 0;
+    private int[][] iconsVisibilities = new int[ROWS][COLS];
     private Random randomObstacle;
     private int randomCol = 0;
     private boolean isFirstGame = true;
+    private Game_Manager gameManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +44,12 @@ public class Activity_Game extends AppCompatActivity {
         randomObstacle = new Random();
         initBackground();
         initButtonsListeners();
+        initGameManager();
         startNewGame();
+    }
+
+    private void initGameManager() {
+        gameManager = Game_Manager.getInstance();
     }
 
     @Override
@@ -90,7 +94,7 @@ public class Activity_Game extends AppCompatActivity {
     private void resetLastRow() {
         for(int i = 0; i< COLS; i++) {
             game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
-            if(playerPosition == i)
+            if(gameManager.getPlayerPosition() == i)
                 game_IMG_player[i].setVisibility(View.VISIBLE);
         }
     }
@@ -125,27 +129,23 @@ public class Activity_Game extends AppCompatActivity {
 
     private void checkIfCatch() {
         for (int i = 0; i < COLS; i++) {
-            if (iconsVisibilities[ROWS-1][i] == 1 && playerPosition == i) {
-                reduceLive();
+            if (iconsVisibilities[ROWS-1][i] == 1 && gameManager.getPlayerPosition() == i) {
+                gameManager.reduceLive();
                 updateLivesUI();
                 changeIconUIForCatch(i);
                 playSoundOfCatching();
                 vibrateOnCatch();
-                if (lives == 0)
+                if (gameManager.getLives() == 0)
                     gameOver();
             }
         }
     }
-
-    private void reduceLive() {
-        lives--;
-    }
     private void updateLivesUI() {
-        for (int i = 0; i < lives; i++) {
+        for (int i = 0; i < gameManager.getLives(); i++) {
             game_IMG_hearts[i].setVisibility(View.VISIBLE);
         }
 
-        for (int i = lives; i < game_IMG_hearts.length; i++) {
+        for (int i = gameManager.getLives(); i < game_IMG_hearts.length; i++) {
             game_IMG_hearts[i].setVisibility(View.INVISIBLE);
         }
     }
@@ -183,18 +183,18 @@ public class Activity_Game extends AppCompatActivity {
     }
 
     private void initLives() {
-        lives = 3;
+        gameManager.resetLives();
         updateLivesUI();
     }
 
     private void initPlayerPosition() {
-        playerPosition = START_PLAYER_POSITION;
+        gameManager.setPlayerPosition();
         setPlayerVisibility();
     }
 
     private void setPlayerVisibility() {
         for(int i=0; i<COLS; i++)
-            if (i == playerPosition)
+            if (i == gameManager.getPlayerPosition())
                 game_IMG_player[i].setVisibility(View.VISIBLE);
             else
                 game_IMG_player[i].setVisibility(View.INVISIBLE);
@@ -269,17 +269,13 @@ public class Activity_Game extends AppCompatActivity {
     }
 
     private void moveLeft() {
-        if(playerPosition == 0)
-            return;
-        playerPosition--;
+        gameManager.changePlayerLeft();
         setPlayerVisibility();
         checkIfCatch();
     }
 
     private void moveRight() {
-        if(playerPosition == COLS-1)
-            return;
-        playerPosition++;
+        gameManager.changePlayerRight();
         setPlayerVisibility();
         checkIfCatch();
     }
