@@ -34,7 +34,6 @@ public class Activity_Game extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
         startViews();
-        My_Signal.init(this);
         My_Screen_Utils.hideSystemUI(this);
         initBackground();
         initButtonsListeners();
