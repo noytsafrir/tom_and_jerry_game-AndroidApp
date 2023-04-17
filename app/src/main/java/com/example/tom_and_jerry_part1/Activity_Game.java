@@ -8,13 +8,9 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.cardview.widget.CardView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
-import java.util.Random;
 
 public class Activity_Game extends AppCompatActivity {
-
-    private final int ROWS = 6;
-    private final int COLS = 3;
-    private final int TIMER_DELAY_MS = 550;
+    private final int TIMER_DELAY_MS = 500;
     private AppCompatImageView[]    game_IMG_hearts;
     private AppCompatImageView[]    game_IMG_player;
     private AppCompatImageView[]    game_IMG_player_catch;
@@ -27,9 +23,8 @@ public class Activity_Game extends AppCompatActivity {
     private Handler timerHandler;
     private Runnable timerRunnable;
     private int timeCount = 0;
-    private int[][] iconsVisibilities = new int[ROWS][COLS];
-    private Random randomObstacle;
-    private int randomCol = 0;
+    private int cols;
+    private int rows;
     private boolean isFirstGame = true;
     private Game_Manager gameManager;
 
@@ -41,7 +36,6 @@ public class Activity_Game extends AppCompatActivity {
         startViews();
         My_Signal.init(this);
         My_Screen_Utils.hideSystemUI(this);
-        randomObstacle = new Random();
         initBackground();
         initButtonsListeners();
         initGameManager();
@@ -50,6 +44,8 @@ public class Activity_Game extends AppCompatActivity {
 
     private void initGameManager() {
         gameManager = Game_Manager.getInstance();
+        rows = gameManager.ROWS;
+        cols = gameManager.COLS;
     }
 
     @Override
@@ -85,41 +81,25 @@ public class Activity_Game extends AppCompatActivity {
     private void afterSec() {
         resetLastRow(); //if there was a catch
         timeCount++;
-        shiftDownRows();
-        addObstacleToFirstRow();
+        gameManager.shiftDownRows();
+        gameManager.addObstacleToFirstRow(timeCount % 2 == 0);
         updateVisibilityOfIcons();
         checkIfCatch();
     }
 
     private void resetLastRow() {
-        for(int i = 0; i< COLS; i++) {
+        for(int i = 0; i< cols; i++) {
             game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
             if(gameManager.getPlayerPosition() == i)
                 game_IMG_player[i].setVisibility(View.VISIBLE);
         }
     }
 
-    private void shiftDownRows() {
-        for (int i = ROWS-1; i > 0; i--) {
-            System.arraycopy(iconsVisibilities[i - 1], 0, iconsVisibilities[i], 0, COLS);
-        }
-    }
-
-
-    private void addObstacleToFirstRow() {
-        for (int i=0; i<COLS; i++)
-            iconsVisibilities[0][i] = 0;
-
-        if(timeCount % 2 == 0) {
-            randomCol = randomObstacle.nextInt(COLS);
-            iconsVisibilities[0][randomCol] = 1;
-        }
-    }
 
     private void updateVisibilityOfIcons() {
-        for (int i=0; i<ROWS; i++){
-            for (int j=0; j<COLS; j++){
-                if(iconsVisibilities[i][j] == 1)
+        for (int i=0; i<rows; i++){
+            for (int j=0; j<cols; j++){
+                if(gameManager.getSpecificBoardObstacle(i,j) == 1)
                     game_IMG_obstacles[i][j].setVisibility(View.VISIBLE);
                 else
                     game_IMG_obstacles[i][j].setVisibility(View.INVISIBLE);
@@ -128,8 +108,8 @@ public class Activity_Game extends AppCompatActivity {
     }
 
     private void checkIfCatch() {
-        for (int i = 0; i < COLS; i++) {
-            if (iconsVisibilities[ROWS-1][i] == 1 && gameManager.getPlayerPosition() == i) {
+        for (int i = 0; i < cols; i++) {
+            if (gameManager.getSpecificBoardObstacle(rows-1,i) == 1 && gameManager.getPlayerPosition() == i) {
                 gameManager.reduceLive();
                 updateLivesUI();
                 changeIconUIForCatch(i);
@@ -152,7 +132,7 @@ public class Activity_Game extends AppCompatActivity {
 
     private void changeIconUIForCatch(int i) {
         game_IMG_player[i].setVisibility(View.INVISIBLE);
-        game_IMG_obstacles[ROWS-1][i].setVisibility(View.INVISIBLE);
+        game_IMG_obstacles[rows-1][i].setVisibility(View.INVISIBLE);
         game_IMG_player_catch[i].setVisibility(View.VISIBLE);
     }
 
@@ -169,7 +149,7 @@ public class Activity_Game extends AppCompatActivity {
         hideGameOverBoard();
         initLives();
         initPlayerPosition();
-        resetMatrixOfIcons();
+        gameManager.resetBoardOfObstacles();
         game_BTN_right.setEnabled(true);
         game_BTN_left.setEnabled(true);
         if(!isFirstGame)
@@ -193,19 +173,11 @@ public class Activity_Game extends AppCompatActivity {
     }
 
     private void setPlayerVisibility() {
-        for(int i=0; i<COLS; i++)
+        for(int i=0; i<cols; i++)
             if (i == gameManager.getPlayerPosition())
                 game_IMG_player[i].setVisibility(View.VISIBLE);
             else
                 game_IMG_player[i].setVisibility(View.INVISIBLE);
-    }
-
-    private void resetMatrixOfIcons() {
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLS; j++) {
-                iconsVisibilities[i][j] = 0;
-            }
-        }
     }
 
     private void initBackground() {
@@ -283,9 +255,9 @@ public class Activity_Game extends AppCompatActivity {
     private void gameOver(){
         stopTimer();
         My_Signal.getInstance().sound(R.raw.msc_game_over);
-        resetMatrixOfIcons();
+        gameManager.resetBoardOfObstacles();
         updateVisibilityOfIcons();
-        for(int i = 0; i< COLS; i++)
+        for(int i = 0; i< cols; i++)
             game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
         game_CV_gameOverBoard.setVisibility(View.VISIBLE);
         game_BTN_right.setEnabled(false);

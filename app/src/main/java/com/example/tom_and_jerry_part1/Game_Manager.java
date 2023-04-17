@@ -1,15 +1,24 @@
 package com.example.tom_and_jerry_part1;
 
+import java.util.Random;
+
 public class Game_Manager {
 
     private static Game_Manager instance;
-    private final int COLS = 3;
+    public final static int COLS = 3;
+    public final static int ROWS = 6;
+
     private final int START_PLAYER_POSITION = COLS / 2;
-    //TODO: decide where to delete the COLS from
     private int lives = 3;
     private int playerPosition;
 
-    private Game_Manager() {}
+    private Random randomObstacle;
+
+    private int[][] boardObstacles = new int[ROWS][COLS];
+
+    private Game_Manager() {
+        randomObstacle = new Random();
+    }
 
     public static Game_Manager getInstance() {
         if (instance == null)
@@ -23,6 +32,10 @@ public class Game_Manager {
 
     public int getPlayerPosition() {
         return playerPosition;
+    }
+
+    public int getSpecificBoardObstacle(int i, int j) {
+        return boardObstacles[i][j];
     }
 
     public void reduceLive() {
@@ -47,6 +60,29 @@ public class Game_Manager {
         if(playerPosition == COLS-1)
             return;
         playerPosition++;
+    }
+
+    public void shiftDownRows() {
+        for (int i = ROWS-1; i > 0; i--) {
+            System.arraycopy(boardObstacles[i - 1], 0, boardObstacles[i], 0, COLS);
+        }
+    }
+    public void addObstacleToFirstRow(boolean addNewRow) {
+        for (int i=0; i<COLS; i++)
+            boardObstacles[0][i] = 0;
+
+        if(addNewRow) {
+            int randomCol = randomObstacle.nextInt(COLS);
+            boardObstacles[0][randomCol] = 1;
+        }
+    }
+
+    public void resetBoardOfObstacles() {
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                boardObstacles[i][j] = 0;
+            }
+        }
     }
 
 }
