@@ -23,11 +23,6 @@
     <!-- Background Layout \\\ -->
 
 
-
-
-
-
-
     <!-- /// Matrix Layout-->
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"

@@ -48,5 +48,4 @@ public class My_Screen_Utils {
         layoutParams.screenBrightness = brightness;
         activity.getWindow().setAttributes(layoutParams);
     }
-
 }
