@@ -1,4 +1,4 @@
-package com.example.tom_and_jerry_part1;
+package com.example.tom_and_jerry_part1.Utils;
 
 import android.app.Activity;
 import android.os.Build;

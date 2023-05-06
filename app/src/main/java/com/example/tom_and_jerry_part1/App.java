@@ -2,6 +2,8 @@ package com.example.tom_and_jerry_part1;
 
 import android.app.Application;
 
+import com.example.tom_and_jerry_part1.Utils.My_Signal;
+
 public class App extends Application {
 
     @Override

@@ -5,14 +5,15 @@ import java.util.Random;
 public class Game_Manager {
 
     private static Game_Manager instance;
-    public final static int COLS = 3;
+    public final static int COLS = 5;
     public final static int ROWS = 6;
-
+    public final static int IMG_TYPES = 2;
     private final int START_PLAYER_POSITION = COLS / 2;
     private int lives = 3;
     private int playerPosition;
-
     private Random randomObstacle;
+
+    private int score = 0;
 
     private int[][] boardObstacles = new int[ROWS][COLS];
 
@@ -26,9 +27,19 @@ public class Game_Manager {
         return instance;
     }
 
+    public void resetBoardOfObstacles() {
+        for (int i = 0; i < ROWS; i++) {
+            for (int j = 0; j < COLS; j++) {
+                boardObstacles[i][j] = 0;
+            }
+        }
+    }
+
     public int getLives() {
         return lives;
     }
+
+    public int getScore() { return score; }
 
     public int getPlayerPosition() {
         return playerPosition;
@@ -45,6 +56,8 @@ public class Game_Manager {
     public void resetLives() {
         lives = 3;
     }
+
+    public void addScore(){ score += 10; }
 
     public void setPlayerPosition() {
         playerPosition = START_PLAYER_POSITION;
@@ -72,17 +85,15 @@ public class Game_Manager {
             boardObstacles[0][i] = 0;
 
         if(addNewRow) {
-            int randomCol = randomObstacle.nextInt(COLS);
-            boardObstacles[0][randomCol] = 1;
+            int randomCol = randomLocationForImg();
+            boardObstacles[0][randomCol] = randomTypeOfImg();
         }
     }
+    public int randomLocationForImg (){ return randomObstacle.nextInt(COLS); }   //between 0-(cols-1)
 
-    public void resetBoardOfObstacles() {
-        for (int i = 0; i < ROWS; i++) {
-            for (int j = 0; j < COLS; j++) {
-                boardObstacles[i][j] = 0;
-            }
-        }
+    public int randomTypeOfImg(){ return randomObstacle.nextInt(IMG_TYPES) + 1;} //1 --> tom , 2 --> cheese
+
+    public void odometer(){
+        score ++;
     }
-
 }

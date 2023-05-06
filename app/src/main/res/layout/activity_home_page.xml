@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activity_Home_Page">
+
+    <!--    Image Background red   -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/game_IMG_back"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.9"
+        android:scaleType="centerCrop"
+        app:srcCompat="@drawable/img_background_red" />
+
+    <!--    Image Background title    -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/game_IMG_back_title"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="630dp"
+        android:alpha="0.9"
+        app:srcCompat="@drawable/img_tom_and_jerry_title" />
+
+    <!--    Image tom & jerry    -->
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/game_IMG_back_top"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="160dp"
+        android:alpha="0.8"
+        app:srcCompat="@drawable/img_tom_n_jerry" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="bottom|center"
+        android:paddingBottom="50dp">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/menu_BTN_playAgain"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Material3.Button.Icon"
+        android:text="Play game"
+        android:backgroundTint="#757A77"
+        android:textSize="20sp"
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/menu_BTN_top10"
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        style="@style/Widget.Material3.Button.Icon"
+        android:text="Top 10"
+        android:backgroundTint="#757A77"
+        android:textSize="20sp"
+        android:layout_below="@+id/menu_BTN_playAgain"
+        android:layout_centerHorizontal="true"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/menu_SW_faster"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Fast Mode"
+            android:shadowColor="#DA9C88"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/menu_BTN_top10"/>
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/menu_SW_sensor"
+            android:layout_width="180dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Sensor Mode"
+            android:shadowColor="#DA9C88"
+            android:textColor="@color/white"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/menu_SW_faster"
+            android:textSize="20sp" />
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</RelativeLayout>
