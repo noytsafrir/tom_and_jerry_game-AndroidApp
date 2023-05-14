@@ -10,7 +10,8 @@ public class MySP {
     private SharedPreferences preferences;
 
     private MySP(Context context){
-        preferences = context.getSharedPreferences(DB_FILE,Context.MODE_PRIVATE);
+        preferences = context.getApplicationContext().getSharedPreferences(DB_FILE, Context.MODE_PRIVATE);
+//        preferences = context.getSharedPreferences(DB_FILE,Context.MODE_PRIVATE);
     }
 
     public static void init(Context context) {

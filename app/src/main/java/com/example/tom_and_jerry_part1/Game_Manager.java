@@ -1,9 +1,7 @@
 package com.example.tom_and_jerry_part1;
 
-import com.example.tom_and_jerry_part1.DB.MyDB;
-import com.example.tom_and_jerry_part1.DB.MySP;
 import com.example.tom_and_jerry_part1.DB.Record;
-import com.google.gson.Gson;
+
 import java.util.Random;
 
 public class Game_Manager {
@@ -111,18 +109,18 @@ public class Game_Manager {
         return record;
     }
 
-    public void saveDetails(double lng , double lat, String name) {
-        MyDB myDB;
-        String json = MySP.getInstance().getString(RECORD,"");
-        myDB = new Gson().fromJson(json,MyDB.class);
-        if(myDB == null){
-            myDB = new MyDB();
-        }
-        Record rec = createRecord(lng,lat, name);
-        myDB.getResults().add(rec);
-        MySP.getInstance().putString(RECORD,new Gson().toJson(myDB));
-    }
-    private Record createRecord(double lng , double lat, String name) {
-        return new Record().setName(name).setScore(score).setLat(lat).setLng(lng);
-    }
+//    public void saveDetails(double lng , double lat, String name) {
+//        MyDB myDB;
+//        String json = MySP.getInstance().getString(RECORD,"");
+//        myDB = new Gson().fromJson(json,MyDB.class);
+//        if(myDB == null){
+//            myDB = new MyDB();
+//        }
+//        Record rec = createRecord(lng,lat, name);
+//        myDB.getTopRecords().add(rec);
+//        MySP.getInstance().putString(RECORD,new Gson().toJson(myDB));
+//    }
+//    private Record createRecord(double lng , double lat, String name) {
+//        return new Record().setName(name).setScore(score).setLat(lat).setLng(lng);
+//    }
 }

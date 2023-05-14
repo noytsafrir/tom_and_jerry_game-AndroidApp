@@ -9,6 +9,8 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.cardview.widget.CardView;
 import com.bumptech.glide.Glide;
+import com.example.tom_and_jerry_part1.DB.Record;
+import com.example.tom_and_jerry_part1.DB.RecordsList;
 import com.example.tom_and_jerry_part1.Game_Manager;
 import com.example.tom_and_jerry_part1.Interfaces.MovementCallback;
 import com.example.tom_and_jerry_part1.R;
@@ -24,8 +26,6 @@ public class Activity_Game extends AppCompatActivity {
     public static final String KEY_LAT = "KEY_LAT";
     public static final String KEY_DELAY = "KEY_DELAY";
     public static final String KEY_SENSOR = "KEY_SENSOR";
-
-    //    public static final String KEY_NAME = "KEY_NAME";
     private final int TIMER_DELAY_MS_SLOW = 550;
     private final int TIMER_DELAY_MS_FAST = 350;
     private AppCompatImageView[] game_IMG_hearts;
@@ -367,18 +367,28 @@ public class Activity_Game extends AppCompatActivity {
 
     private void changeActivityToTop10() {
         if (game_IET_name.getText().length() != 0) {
+            Record record = new Record()
+                    .setName(game_IET_name.getText().toString())
+                    .setScore(gameManager.getScore())
+                    .setLat(this.lat)
+                    .setLng(this.lng);
+
+            RecordsList.getInstance().addRecord(record);
             Intent intent = new Intent(this, Top10_score.class);
-            name = game_IET_name.getText().toString();
-            saveRecord();
             startActivity(intent);
             finish();
+//            Intent intent = new Intent(this, Top10_score.class);
+//            name = game_IET_name.getText().toString();
+//            saveRecord();
+//            startActivity(intent);
+//            finish();
         } else
             My_Signal.getInstance().toast("You Must Fill Name");
     }
 
-    private void saveRecord() {
-        gameManager.saveDetails(lng, lat, name);
-    }
+//    private void saveRecord() {
+//        gameManager.saveDetails(lng, lat, name);
+//    }
 
 
     /**

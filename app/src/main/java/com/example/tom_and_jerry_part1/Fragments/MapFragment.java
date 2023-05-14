@@ -9,13 +9,21 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.tom_and_jerry_part1.DB.Record;
+import com.example.tom_and_jerry_part1.DB.RecordsList;
 import com.example.tom_and_jerry_part1.R;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapFragment extends Fragment{
     private GoogleMap googleMap;
@@ -25,8 +33,17 @@ public class MapFragment extends Fragment{
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_map_fragment, container, false);
         SupportMapFragment supportMapFragment = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.maps));
-        supportMapFragment.getMapAsync(googleMap -> {
-            this.googleMap = googleMap;
+        supportMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                MapFragment.this.googleMap = googleMap;
+
+                List<LatLng> locations = new ArrayList<>();
+                for (Record record : RecordsList.getInstance().getTopRecords())
+                    locations.add(new LatLng(record.getLat(), record.getLng()));
+
+                setMapMultipleLocations(locations);
+            }
         });
         return view;
     }
@@ -41,5 +58,17 @@ public class MapFragment extends Fragment{
                 .build();                       // Creates a CameraPosition from the builder
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
+    }
+
+    public void setMapMultipleLocations(List<LatLng> locations) {
+        googleMap.clear();
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (LatLng location : locations)
+            builder.include(location); // Add marker position to builder
+
+        LatLngBounds bounds = builder.build();
+        int padding = 100; // Padding in pixels to set around the markers
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        googleMap.animateCamera(cameraUpdate);
     }
 }

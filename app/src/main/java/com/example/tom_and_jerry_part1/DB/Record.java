@@ -1,10 +1,12 @@
 package com.example.tom_and_jerry_part1.DB;
 
+import androidx.annotation.NonNull;
+
 public class Record {
     private int score = 0;
     private String name ="";
     private double lat = 0.0;
-    private double lon = 0.0;
+    private double lng = 0.0;
 
 
     public Record(){ }
@@ -37,17 +39,17 @@ public class Record {
     }
 
     public double getLng() {
-        return lon;
+        return lng;
     }
 
     public Record setLng(double lon) {
-        this.lon = lon;
+        this.lng = lon;
         return this;
     }
 
+    @NonNull
     @Override
     public String toString() {
-        return name + "  -  " + score;
-
+        return score + "\t" + name + " \t" + lat + ", " + lng;
     }
 }
