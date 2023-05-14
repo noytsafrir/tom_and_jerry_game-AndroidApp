@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity_Game">
+    tools:context=".Activities.Activity_Game">
 
     <!--    Image Background    -->
     <androidx.appcompat.widget.AppCompatImageView
@@ -635,7 +635,7 @@
                 tools:targetApi="o"/>
 
             <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/game_LBL_scores"
+                android:id="@+id/game_LBL_final_score"
                 android:layout_width="200dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center_horizontal"
@@ -654,17 +654,9 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_centerHorizontal="true"/>
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/game_ING_end"
-                android:layout_width="wrap_content"
-                android:layout_height="0dp"
-                android:layout_weight="3"
-                app:srcCompat="@drawable/ic_end_game">
-            </androidx.appcompat.widget.AppCompatImageView>
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/game_BTN_confirm"
-                android:layout_width="match_parent"
+                android:layout_width="150dp"
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:backgroundTint="#B2503E71"
@@ -677,6 +669,14 @@
                 tools:ignore="HardcodedText">
 
             </com.google.android.material.button.MaterialButton>
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/game_ING_end"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                app:srcCompat="@drawable/ic_end_game">
+            </androidx.appcompat.widget.AppCompatImageView>
 
 
         </androidx.appcompat.widget.LinearLayoutCompat>

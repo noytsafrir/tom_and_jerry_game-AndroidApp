@@ -1,5 +1,9 @@
 package com.example.tom_and_jerry_part1;
 
+import com.example.tom_and_jerry_part1.DB.MyDB;
+import com.example.tom_and_jerry_part1.DB.MySP;
+import com.example.tom_and_jerry_part1.DB.Record;
+import com.google.gson.Gson;
 import java.util.Random;
 
 public class Game_Manager {
@@ -8,12 +12,14 @@ public class Game_Manager {
     public final static int COLS = 5;
     public final static int ROWS = 6;
     public final static int IMG_TYPES = 2;
+
     private final int START_PLAYER_POSITION = COLS / 2;
     private int lives = 3;
     private int playerPosition;
     private Random randomObstacle;
-
+    private final String RECORD = "records";
     private int score = 0;
+    private Record record;
 
     private int[][] boardObstacles = new int[ROWS][COLS];
 
@@ -27,7 +33,7 @@ public class Game_Manager {
         return instance;
     }
 
-    public void resetBoardOfObstacles() {
+        public void resetBoardOfObstacles() {
         for (int i = 0; i < ROWS; i++) {
             for (int j = 0; j < COLS; j++) {
                 boardObstacles[i][j] = 0;
@@ -55,6 +61,10 @@ public class Game_Manager {
 
     public void resetLives() {
         lives = 3;
+    }
+
+    public void resetScore() {
+        score = 0;
     }
 
     public void addScore(){ score += 10; }
@@ -95,5 +105,24 @@ public class Game_Manager {
 
     public void odometer(){
         score ++;
+    }
+
+    public Record getRecord() {
+        return record;
+    }
+
+    public void saveDetails(double lng , double lat, String name) {
+        MyDB myDB;
+        String json = MySP.getInstance().getString(RECORD,"");
+        myDB = new Gson().fromJson(json,MyDB.class);
+        if(myDB == null){
+            myDB = new MyDB();
+        }
+        Record rec = createRecord(lng,lat, name);
+        myDB.getResults().add(rec);
+        MySP.getInstance().putString(RECORD,new Gson().toJson(myDB));
+    }
+    private Record createRecord(double lng , double lat, String name) {
+        return new Record().setName(name).setScore(score).setLat(lat).setLng(lng);
     }
 }

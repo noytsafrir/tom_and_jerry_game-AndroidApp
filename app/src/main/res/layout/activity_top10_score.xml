@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Top10_score">
+    tools:context=".Activities.Top10_score">
 
     <!--    Image Background    -->
     <androidx.appcompat.widget.AppCompatImageView
@@ -29,6 +29,28 @@
         android:layout_weight="1.2"
         android:padding="15dp"
         android:layout_marginTop="15dp"/>
+
+<!--        <com.google.android.material.card.MaterialCardView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="400dp"-->
+<!--            android:layout_margin="32dp"-->
+<!--            android:elevation="22dp"-->
+<!--            app:cardElevation="22dp"-->
+<!--            app:cardCornerRadius="20dp">-->
+
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:background="#B2A5A5A5">-->
+
+<!--                <ListView-->
+<!--                    android:id="@+id/top10_LV_scores"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="match_parent"/>-->
+<!--            </RelativeLayout>-->
+
+<!--        </com.google.android.material.card.MaterialCardView>-->
+
 
     <FrameLayout
         android:id="@+id/top10_FLO_map"

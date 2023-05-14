@@ -1,4 +1,4 @@
-package com.example.tom_and_jerry_part1;
+package com.example.tom_and_jerry_part1.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,14 +9,23 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.cardview.widget.CardView;
 import com.bumptech.glide.Glide;
+import com.example.tom_and_jerry_part1.Game_Manager;
+import com.example.tom_and_jerry_part1.R;
 import com.example.tom_and_jerry_part1.Utils.My_Screen_Utils;
 import com.example.tom_and_jerry_part1.Utils.My_Signal;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textview.MaterialTextView;
 
 public class Activity_Game extends AppCompatActivity {
-    private final int TIMER_DELAY_MS = 500;
+
+    public static final String KEY_LNG = "KEY_LNG";
+    public static final String KEY_LAT = "KEY_LAT";
+    public static final String KEY_DELAY = "KEY_DELAY";
+    public static final String KEY_SENSOR = "KEY_SENSOR";
+
+    public static final String KEY_NAME = "KEY_NAME";
+    private final int TIMER_DELAY_MS_SLOW = 550;
+    private final int TIMER_DELAY_MS_FAST = 350;
     private AppCompatImageView[]    game_IMG_hearts;
     private AppCompatImageView[]    game_IMG_player;
     private AppCompatImageView[]    game_IMG_player_catch;
@@ -30,6 +39,7 @@ public class Activity_Game extends AppCompatActivity {
     private MaterialButton          game_BTN_move_to_top10;
     private AppCompatEditText       game_IET_name;
     private MaterialTextView        game_LBL_score;
+    private MaterialTextView        game_LBL_final_score;
     private CardView                game_CV_gameOverBoard;
     private AppCompatImageView      game_IMG_back;
     private Handler timerHandler;
@@ -37,7 +47,14 @@ public class Activity_Game extends AppCompatActivity {
     private int timeCount = 0;
     private int cols;
     private int rows;
+    private double lng;
+    private double lat;
     private boolean isFirstGame = true;
+    public boolean isSensorOn = false;
+    public boolean isFasterMode = false;
+    private String name = "";
+
+
     private Game_Manager gameManager;
 
 
@@ -48,8 +65,9 @@ public class Activity_Game extends AppCompatActivity {
         startViews();
         My_Screen_Utils.hideSystemUI(this);
         initBackground();
+        Intent previousIntent  = getIntent();
+        initGameManager(previousIntent);
         initButtonsListeners();
-        initGameManager();
         startNewGame();
     }
 
@@ -57,6 +75,7 @@ public class Activity_Game extends AppCompatActivity {
         My_Signal.getInstance().sound(R.raw.msc_start_game);
         hideGameOverBoard();
         initLives();
+        initScore();
         initPlayerPosition();
         gameManager.resetBoardOfObstacles();
         game_BTN_right.setEnabled(true);
@@ -67,11 +86,14 @@ public class Activity_Game extends AppCompatActivity {
             isFirstGame = false;
     }
 
-
-    private void initGameManager() {
+    private void initGameManager(Intent previousIntent) {
         gameManager = Game_Manager.getInstance();
         rows = gameManager.ROWS;
         cols = gameManager.COLS;
+        isFasterMode = previousIntent.getExtras().getBoolean(KEY_DELAY);
+        isSensorOn= previousIntent.getExtras().getBoolean(KEY_SENSOR);
+        lng = previousIntent.getExtras().getDouble(KEY_LNG);
+        lat = previousIntent.getExtras().getDouble(KEY_LAT);
     }
 
     @Override
@@ -92,11 +114,14 @@ public class Activity_Game extends AppCompatActivity {
         timerRunnable = new Runnable() {
             @Override
             public void run() {
-                timerHandler.postDelayed(this, TIMER_DELAY_MS);
+                if(isFasterMode)
+                    timerHandler.postDelayed(this, TIMER_DELAY_MS_FAST);
+                else
+                    timerHandler.postDelayed(this, TIMER_DELAY_MS_SLOW);
                 afterSec();
             }
         };
-        timerHandler.postDelayed(timerRunnable, TIMER_DELAY_MS);
+        timerHandler.postDelayed(timerRunnable, TIMER_DELAY_MS_SLOW);
     }
 
     private void stopTimer() {
@@ -159,7 +184,6 @@ public class Activity_Game extends AppCompatActivity {
                     playSoundOfSuccess();
                 }
             }
-
         }
     }
 
@@ -171,13 +195,14 @@ public class Activity_Game extends AppCompatActivity {
         for (int i = gameManager.getLives(); i < game_IMG_hearts.length; i++) {
             game_IMG_hearts[i].setVisibility(View.INVISIBLE);
         }
+        if(gameManager.getLives() < 3 && gameManager.getLives() > 0)
+            My_Signal.getInstance().toast("You have "+ gameManager.getLives()+ " lives");
     }
-
     private void updateScore(){
         game_LBL_score.setText("score: "+ gameManager.getScore());
     }
 
-private int changeVisibilityOfPlayer(int i, int type){
+    private int changeVisibilityOfPlayer(int i, int type){
     game_IMG_obstacles[rows-1][i].setVisibility(View.INVISIBLE);
     game_IMG_player[i].setVisibility(View.VISIBLE);
     return getResources().getIdentifier(typeImagePlayer[type], "drawable", getPackageName());
@@ -210,6 +235,11 @@ private int changeVisibilityOfPlayer(int i, int type){
     private void initLives() {
         gameManager.resetLives();
         updateLivesUI();
+    }
+
+    private void initScore(){
+        gameManager.resetScore();
+        updateScore();
     }
 
     private void initPlayerPosition() {
@@ -260,6 +290,7 @@ private int changeVisibilityOfPlayer(int i, int type){
         game_CV_gameOverBoard = findViewById(R.id.game_CV_gameOverBoard);
         game_IET_name = findViewById(R.id.game_IET_name);
         game_LBL_score = findViewById(R.id.game_LBL_score);
+        game_LBL_final_score = findViewById(R.id.game_LBL_final_score);
 
         game_IMG_hearts = new AppCompatImageView[]{
                 findViewById(R.id.game_IMG_heart1),
@@ -296,7 +327,6 @@ private int changeVisibilityOfPlayer(int i, int type){
     private void initButtonsListeners() {
         game_BTN_left.setOnClickListener(v -> moveLeft());
         game_BTN_right.setOnClickListener(v -> moveRight());
-        //game_BTN_playAgain.setOnClickListener(v -> startNewGame());
         game_BTN_move_to_top10.setOnClickListener(v -> changeActivityToTop10());
     }
 
@@ -319,6 +349,7 @@ private int changeVisibilityOfPlayer(int i, int type){
         updateVisibilityOfIcons();
         for(int i = 0; i< cols; i++)
             game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
+        game_LBL_final_score.setText("Your Score: " + gameManager.getScore());
         game_CV_gameOverBoard.setVisibility(View.VISIBLE);
         game_BTN_right.setEnabled(false);
         game_BTN_left.setEnabled(false);
@@ -326,10 +357,16 @@ private int changeVisibilityOfPlayer(int i, int type){
     private void changeActivityToTop10() {
         if(game_IET_name.getText().length() != 0) {
             Intent intent = new Intent(this, Top10_score.class);
+            name = game_IET_name.getText().toString();
+            saveRecord();
             startActivity(intent);
             finish();
         }
         else
             My_Signal.getInstance().toast("You Must Fill Name");
+    }
+
+    private void saveRecord() {
+        gameManager.saveDetails(lng,lat, name);
     }
 }
