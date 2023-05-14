@@ -10,7 +10,9 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.cardview.widget.CardView;
 import com.bumptech.glide.Glide;
 import com.example.tom_and_jerry_part1.Game_Manager;
+import com.example.tom_and_jerry_part1.Interfaces.MovementCallback;
 import com.example.tom_and_jerry_part1.R;
+import com.example.tom_and_jerry_part1.Sensors.MovementSensor;
 import com.example.tom_and_jerry_part1.Utils.My_Screen_Utils;
 import com.example.tom_and_jerry_part1.Utils.My_Signal;
 import com.google.android.material.button.MaterialButton;
@@ -23,25 +25,25 @@ public class Activity_Game extends AppCompatActivity {
     public static final String KEY_DELAY = "KEY_DELAY";
     public static final String KEY_SENSOR = "KEY_SENSOR";
 
-    public static final String KEY_NAME = "KEY_NAME";
+    //    public static final String KEY_NAME = "KEY_NAME";
     private final int TIMER_DELAY_MS_SLOW = 550;
     private final int TIMER_DELAY_MS_FAST = 350;
-    private AppCompatImageView[]    game_IMG_hearts;
-    private AppCompatImageView[]    game_IMG_player;
-    private AppCompatImageView[]    game_IMG_player_catch;
-    private AppCompatImageView[][]  game_IMG_obstacles;
+    private AppCompatImageView[] game_IMG_hearts;
+    private AppCompatImageView[] game_IMG_player;
+    private AppCompatImageView[] game_IMG_player_catch;
+    private AppCompatImageView[][] game_IMG_obstacles;
 
-    private String[] typeImage= new String[]{"ic_tom","ic_cheese"};
-    private String[] typeImagePlayer= new String[]{"ic_jerry", "img_tom_catch_jerry", "img_jerry_catch_cheese"};
+    private String[] typeImage = new String[]{"ic_tom", "ic_cheese"};
+    private String[] typeImagePlayer = new String[]{"ic_jerry", "img_tom_catch_jerry", "img_jerry_catch_cheese"};
 
-    private MaterialButton          game_BTN_right;
-    private MaterialButton          game_BTN_left;
-    private MaterialButton          game_BTN_move_to_top10;
-    private AppCompatEditText       game_IET_name;
-    private MaterialTextView        game_LBL_score;
-    private MaterialTextView        game_LBL_final_score;
-    private CardView                game_CV_gameOverBoard;
-    private AppCompatImageView      game_IMG_back;
+    private MaterialButton game_BTN_right;
+    private MaterialButton game_BTN_left;
+    private MaterialButton game_BTN_move_to_top10;
+    private AppCompatEditText game_IET_name;
+    private MaterialTextView game_LBL_score;
+    private MaterialTextView game_LBL_final_score;
+    private CardView game_CV_gameOverBoard;
+    private AppCompatImageView game_IMG_back;
     private Handler timerHandler;
     private Runnable timerRunnable;
     private int timeCount = 0;
@@ -53,8 +55,7 @@ public class Activity_Game extends AppCompatActivity {
     public boolean isSensorOn = false;
     public boolean isFasterMode = false;
     private String name = "";
-
-
+    private MovementSensor movementSensor;
     private Game_Manager gameManager;
 
 
@@ -65,8 +66,9 @@ public class Activity_Game extends AppCompatActivity {
         startViews();
         My_Screen_Utils.hideSystemUI(this);
         initBackground();
-        Intent previousIntent  = getIntent();
+        Intent previousIntent = getIntent();
         initGameManager(previousIntent);
+        checkSensorMode();
         initButtonsListeners();
         startNewGame();
     }
@@ -80,7 +82,7 @@ public class Activity_Game extends AppCompatActivity {
         gameManager.resetBoardOfObstacles();
         game_BTN_right.setEnabled(true);
         game_BTN_left.setEnabled(true);
-        if(!isFirstGame)
+        if (!isFirstGame)
             startTimer();
         else
             isFirstGame = false;
@@ -91,9 +93,10 @@ public class Activity_Game extends AppCompatActivity {
         rows = gameManager.ROWS;
         cols = gameManager.COLS;
         isFasterMode = previousIntent.getExtras().getBoolean(KEY_DELAY);
-        isSensorOn= previousIntent.getExtras().getBoolean(KEY_SENSOR);
+        isSensorOn = previousIntent.getExtras().getBoolean(KEY_SENSOR);
         lng = previousIntent.getExtras().getDouble(KEY_LNG);
         lat = previousIntent.getExtras().getDouble(KEY_LAT);
+
     }
 
     @Override
@@ -106,7 +109,10 @@ public class Activity_Game extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         stopTimer();
+        if (isSensorOn)
+            movementSensor.stop();
     }
+
 
     //timer
     private void startTimer() {
@@ -114,7 +120,7 @@ public class Activity_Game extends AppCompatActivity {
         timerRunnable = new Runnable() {
             @Override
             public void run() {
-                if(isFasterMode)
+                if (isFasterMode)
                     timerHandler.postDelayed(this, TIMER_DELAY_MS_FAST);
                 else
                     timerHandler.postDelayed(this, TIMER_DELAY_MS_SLOW);
@@ -141,15 +147,15 @@ public class Activity_Game extends AppCompatActivity {
     }
 
     private void resetLastRow() {
-        for(int i = 0; i< cols; i++) {
+        for (int i = 0; i < cols; i++) {
             int imageId = getResources().getIdentifier(typeImagePlayer[0], "drawable", getPackageName());
             game_IMG_player[i].setImageResource(imageId);
         }
     }
 
     private void updateVisibilityOfIcons() {
-        for (int i=0; i<rows; i++){
-            for (int j=0; j<cols; j++) {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 if (gameManager.getSpecificBoardObstacle(i, j) == 0)
                     game_IMG_obstacles[i][j].setVisibility(View.INVISIBLE);
                 else {
@@ -160,14 +166,14 @@ public class Activity_Game extends AppCompatActivity {
         }
     }
 
-    private void setImage(int imgType, int i, int j){
-        int imageId = getResources().getIdentifier(typeImage[imgType-1], "drawable", getPackageName());
+    private void setImage(int imgType, int i, int j) {
+        int imageId = getResources().getIdentifier(typeImage[imgType - 1], "drawable", getPackageName());
         game_IMG_obstacles[i][j].setImageResource(imageId);
     }
 
     private void checkIfCatch() {
         for (int i = 0; i < cols; i++) {
-            if(gameManager.getPlayerPosition() == i) {
+            if (gameManager.getPlayerPosition() == i) {
                 if (gameManager.getSpecificBoardObstacle(rows - 1, i) == 1) {
                     gameManager.reduceLive();
                     updateLivesUI();
@@ -176,8 +182,7 @@ public class Activity_Game extends AppCompatActivity {
                     vibrateOnCatch();
                     if (gameManager.getLives() == 0)
                         gameOver();
-                }
-                else if(gameManager.getSpecificBoardObstacle(rows - 1, i) == 2){
+                } else if (gameManager.getSpecificBoardObstacle(rows - 1, i) == 2) {
                     gameManager.addScore();
                     updateScore();
                     changeIconUIForJerryEatCheese(i);
@@ -195,26 +200,27 @@ public class Activity_Game extends AppCompatActivity {
         for (int i = gameManager.getLives(); i < game_IMG_hearts.length; i++) {
             game_IMG_hearts[i].setVisibility(View.INVISIBLE);
         }
-        if(gameManager.getLives() < 3 && gameManager.getLives() > 0)
-            My_Signal.getInstance().toast("You have "+ gameManager.getLives()+ " lives");
-    }
-    private void updateScore(){
-        game_LBL_score.setText("score: "+ gameManager.getScore());
+        if (gameManager.getLives() < 3 && gameManager.getLives() > 0)
+            My_Signal.getInstance().toast("You have " + gameManager.getLives() + " lives");
     }
 
-    private int changeVisibilityOfPlayer(int i, int type){
-    game_IMG_obstacles[rows-1][i].setVisibility(View.INVISIBLE);
-    game_IMG_player[i].setVisibility(View.VISIBLE);
-    return getResources().getIdentifier(typeImagePlayer[type], "drawable", getPackageName());
-}
+    private void updateScore() {
+        game_LBL_score.setText("score: " + gameManager.getScore());
+    }
+
+    private int changeVisibilityOfPlayer(int i, int type) {
+        game_IMG_obstacles[rows - 1][i].setVisibility(View.INVISIBLE);
+        game_IMG_player[i].setVisibility(View.VISIBLE);
+        return getResources().getIdentifier(typeImagePlayer[type], "drawable", getPackageName());
+    }
 
     private void changeIconUIForCatch(int i) {
-        int imageId = changeVisibilityOfPlayer(i,1); // 1 --> tom catch jerry
+        int imageId = changeVisibilityOfPlayer(i, 1); // 1 --> tom catch jerry
         game_IMG_player[i].setImageResource(imageId);
     }
 
-    private void changeIconUIForJerryEatCheese(int i){
-        int imageId = changeVisibilityOfPlayer(i,2); // 2 --> jerry catch cheese
+    private void changeIconUIForJerryEatCheese(int i) {
+        int imageId = changeVisibilityOfPlayer(i, 2); // 2 --> jerry catch cheese
         game_IMG_player[i].setImageResource(imageId);
     }
 
@@ -222,7 +228,9 @@ public class Activity_Game extends AppCompatActivity {
         My_Signal.getInstance().sound(R.raw.msc_tom_catch_jerry);
     }
 
-    private void playSoundOfSuccess() { My_Signal.getInstance().sound(R.raw.msc_yay); }
+    private void playSoundOfSuccess() {
+        My_Signal.getInstance().sound(R.raw.msc_yay);
+    }
 
     private void vibrateOnCatch() {
         My_Signal.getInstance().vibrate(400);
@@ -237,7 +245,7 @@ public class Activity_Game extends AppCompatActivity {
         updateLivesUI();
     }
 
-    private void initScore(){
+    private void initScore() {
         gameManager.resetScore();
         updateScore();
     }
@@ -248,7 +256,7 @@ public class Activity_Game extends AppCompatActivity {
     }
 
     private void setPlayerVisibility() {
-        for(int i=0; i<cols; i++)
+        for (int i = 0; i < cols; i++)
             if (i == gameManager.getPlayerPosition())
                 game_IMG_player[i].setVisibility(View.VISIBLE);
             else
@@ -285,7 +293,7 @@ public class Activity_Game extends AppCompatActivity {
     private void startViews() {
         game_IMG_back = findViewById(R.id.game_IMG_back);
         game_BTN_right = findViewById(R.id.game_BTN_right);
-        game_BTN_left  = findViewById(R.id.game_BTN_left);
+        game_BTN_left = findViewById(R.id.game_BTN_left);
         game_BTN_move_to_top10 = findViewById(R.id.game_BTN_confirm);
         game_CV_gameOverBoard = findViewById(R.id.game_CV_gameOverBoard);
         game_IET_name = findViewById(R.id.game_IET_name);
@@ -314,7 +322,7 @@ public class Activity_Game extends AppCompatActivity {
                 findViewById(R.id.game_IMG_player_catch_5),
         };
 
-        game_IMG_obstacles = new AppCompatImageView[][] {
+        game_IMG_obstacles = new AppCompatImageView[][]{
                 {findViewById(R.id.game_IMG_1_1), findViewById(R.id.game_IMG_1_2), findViewById(R.id.game_IMG_1_3), findViewById(R.id.game_IMG_1_4), findViewById(R.id.game_IMG_1_5)},
                 {findViewById(R.id.game_IMG_2_1), findViewById(R.id.game_IMG_2_2), findViewById(R.id.game_IMG_2_3), findViewById(R.id.game_IMG_2_4), findViewById(R.id.game_IMG_2_5)},
                 {findViewById(R.id.game_IMG_3_1), findViewById(R.id.game_IMG_3_2), findViewById(R.id.game_IMG_3_3), findViewById(R.id.game_IMG_3_4), findViewById(R.id.game_IMG_3_5)},
@@ -342,31 +350,66 @@ public class Activity_Game extends AppCompatActivity {
         checkIfCatch();
     }
 
-    private void gameOver(){
+    private void gameOver() {
         stopTimer();
         My_Signal.getInstance().sound(R.raw.msc_game_over);
         gameManager.resetBoardOfObstacles();
         updateVisibilityOfIcons();
-        for(int i = 0; i< cols; i++)
+        if (isSensorOn)
+            movementSensor.stop();
+        for (int i = 0; i < cols; i++)
             game_IMG_player_catch[i].setVisibility(View.INVISIBLE);
         game_LBL_final_score.setText("Your Score: " + gameManager.getScore());
         game_CV_gameOverBoard.setVisibility(View.VISIBLE);
         game_BTN_right.setEnabled(false);
         game_BTN_left.setEnabled(false);
     }
+
     private void changeActivityToTop10() {
-        if(game_IET_name.getText().length() != 0) {
+        if (game_IET_name.getText().length() != 0) {
             Intent intent = new Intent(this, Top10_score.class);
             name = game_IET_name.getText().toString();
             saveRecord();
             startActivity(intent);
             finish();
-        }
-        else
+        } else
             My_Signal.getInstance().toast("You Must Fill Name");
     }
 
     private void saveRecord() {
-        gameManager.saveDetails(lng,lat, name);
+        gameManager.saveDetails(lng, lat, name);
+    }
+
+
+    /**
+     * checks if the sensor switch is on:
+     * true - initiates sensors and start them, sets the arrows to invisible.
+     * false - sets the arrows to visible.
+     **/
+    private void checkSensorMode() {
+        if (isSensorOn) { // sensor mode
+            initMovementSensor();
+            game_BTN_left.setVisibility(View.INVISIBLE);
+            game_BTN_right.setVisibility(View.INVISIBLE);
+            movementSensor.start();
+        } else {
+            game_BTN_left.setVisibility(View.VISIBLE);
+            game_BTN_right.setVisibility(View.VISIBLE);
+        }
+    }
+
+
+    private void initMovementSensor() {
+        movementSensor = new MovementSensor(this, new MovementCallback() {
+            @Override
+            public void playerMoveLeft() {
+                moveLeft();
+            }
+
+            @Override
+            public void playerMoveRight() {
+                moveRight();
+            }
+        });
     }
 }

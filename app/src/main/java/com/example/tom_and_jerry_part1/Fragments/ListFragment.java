@@ -45,9 +45,6 @@ public class ListFragment extends Fragment {
                 double lat = allRecords.getResults().get(position).getLat();
                 double lng = allRecords.getResults().get(position).getLng();
                 String playerName = allRecords.getResults().get(position).getName();
-//                double lat = Data_Manager.getInstance().getTop10Records().get(position).getLat();
-//                double lng = Data_Manager.getInstance().getTop10Records().get(position).getLng();
-//                String playerName = Data_Manager.getInstance().getTop10Records().get(position).getName();
                 callBack_list.setMapLocation(lat,lng,playerName);
             }
         });
