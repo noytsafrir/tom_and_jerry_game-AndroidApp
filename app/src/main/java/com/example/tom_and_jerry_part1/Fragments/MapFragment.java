@@ -37,34 +37,36 @@ public class MapFragment extends Fragment{
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 MapFragment.this.googleMap = googleMap;
-
-                List<LatLng> locations = new ArrayList<>();
-                for (Record record : RecordsList.getInstance().getTopRecords())
-                    locations.add(new LatLng(record.getLat(), record.getLng()));
-
-                setMapMultipleLocations(locations);
+                List<Record> recordsList = RecordsList.getInstance().getTopRecords();
+                if(!recordsList.isEmpty()) {
+                    List<LatLng> locations = new ArrayList<>();
+                    for (Record record : recordsList)
+                        locations.add(new LatLng(record.getLat(), record.getLng()));
+                    setMapMultipleLocations(locations);
+                }
             }
         });
         return view;
     }
 
-    public void setMapLocation(double lat,double lng,String namePlayer){
+    public void setMapLocation(double lat,double lng,String namePlayer) {
         googleMap.clear();
         googleMap.addMarker(new MarkerOptions()
-                .position(new LatLng(lat,lng)).title(namePlayer));
+                .position(new LatLng(lat, lng)).title(namePlayer));
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(new LatLng(lat, lng))   // Sets the center of the map to location user
                 .zoom(15)                       // Sets the zoom
                 .build();                       // Creates a CameraPosition from the builder
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
     }
 
     public void setMapMultipleLocations(List<LatLng> locations) {
         googleMap.clear();
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (LatLng location : locations)
+        for (LatLng location : locations) {
             builder.include(location); // Add marker position to builder
+            googleMap.addMarker(new MarkerOptions().position(location));
+        }
 
         LatLngBounds bounds = builder.build();
         int padding = 100; // Padding in pixels to set around the markers

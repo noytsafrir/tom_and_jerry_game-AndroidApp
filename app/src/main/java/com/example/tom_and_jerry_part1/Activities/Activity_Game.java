@@ -377,25 +377,9 @@ public class Activity_Game extends AppCompatActivity {
             Intent intent = new Intent(this, Top10_score.class);
             startActivity(intent);
             finish();
-//            Intent intent = new Intent(this, Top10_score.class);
-//            name = game_IET_name.getText().toString();
-//            saveRecord();
-//            startActivity(intent);
-//            finish();
         } else
             My_Signal.getInstance().toast("You Must Fill Name");
     }
-
-//    private void saveRecord() {
-//        gameManager.saveDetails(lng, lat, name);
-//    }
-
-
-    /**
-     * checks if the sensor switch is on:
-     * true - initiates sensors and start them, sets the arrows to invisible.
-     * false - sets the arrows to visible.
-     **/
     private void checkSensorMode() {
         if (isSensorOn) { // sensor mode
             initMovementSensor();

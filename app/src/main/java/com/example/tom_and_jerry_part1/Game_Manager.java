@@ -1,7 +1,5 @@
 package com.example.tom_and_jerry_part1;
 
-//import com.example.tom_and_jerry_part1.DB.Record;
-
 import java.util.Random;
 
 public class Game_Manager {
@@ -15,9 +13,7 @@ public class Game_Manager {
     private int lives = 3;
     private int playerPosition;
     private Random randomObstacle;
-//    private final String RECORD = "records";
     private int score = 0;
-//    private Record record;
 
     private int[][] boardObstacles = new int[ROWS][COLS];
 
@@ -104,23 +100,4 @@ public class Game_Manager {
     public void odometer(){
         score ++;
     }
-
-//    public Record getRecord() {
-//        return record;
-//    }
-
-//    public void saveDetails(double lng , double lat, String name) {
-//        MyDB myDB;
-//        String json = MySP.getInstance().getString(RECORD,"");
-//        myDB = new Gson().fromJson(json,MyDB.class);
-//        if(myDB == null){
-//            myDB = new MyDB();
-//        }
-//        Record rec = createRecord(lng,lat, name);
-//        myDB.getTopRecords().add(rec);
-//        MySP.getInstance().putString(RECORD,new Gson().toJson(myDB));
-//    }
-//    private Record createRecord(double lng , double lat, String name) {
-//        return new Record().setName(name).setScore(score).setLat(lat).setLng(lng);
-//    }
 }

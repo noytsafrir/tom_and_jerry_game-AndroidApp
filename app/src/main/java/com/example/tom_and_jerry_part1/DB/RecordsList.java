@@ -1,5 +1,6 @@
 package com.example.tom_and_jerry_part1.DB;
-import com.example.tom_and_jerry_part1.DB.Record;
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -14,10 +15,10 @@ public class RecordsList {
 
     public RecordsList() {
         this.topRecords = loadData();
-        sortRecords();
-
-        if (topRecords == null)
+        if (topRecords == null) {
             this.topRecords = new ArrayList<>();
+        }
+        sortRecords();
     }
 
     public static RecordsList getInstance() {
@@ -36,11 +37,13 @@ public class RecordsList {
             topRecords.add(newRecord);
             saveData();
         }
-        Record lastRecord = topRecords.get(topRecords.size()-1);
-        if (lastRecord.getScore() < newRecord.getScore()){
-            topRecords.remove(lastRecord);
-            topRecords.add(newRecord);
-            saveData();
+        else {
+            Record lastRecord = topRecords.get(topRecords.size() - 1);
+            if (lastRecord.getScore() < newRecord.getScore()) {
+                topRecords.remove(lastRecord);
+                topRecords.add(newRecord);
+                saveData();
+            }
         }
         sortRecords();
     }
@@ -55,6 +58,7 @@ public class RecordsList {
         sortRecords();
         String recordsJson = new Gson().toJson(topRecords);
         MySP.getInstance().putString(RECORD, recordsJson);
+
     }
 
     private void sortRecords() {
