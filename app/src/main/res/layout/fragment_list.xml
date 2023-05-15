@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#75C1BEBE"
-    tools:context=".Activities.Top10_score">
+    android:background="#75C1BEBE">
+<!--    tools:context=".Activities.Top10_score">-->
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/fraglist_LBL_top10"

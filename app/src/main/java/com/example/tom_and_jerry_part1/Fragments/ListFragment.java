@@ -33,14 +33,11 @@ public class ListFragment extends Fragment {
         startViews(view);
         initViews();
 
-        fraglist_LV_list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                double lat = RecordsList.getInstance().getTopRecords().get(position).getLat();
-                double lng = RecordsList.getInstance().getTopRecords().get(position).getLng();
-                String playerName = RecordsList.getInstance().getTopRecords().get(position).getName();
-                callBack_list.setMapLocation(lat,lng,playerName);
-            }
+        fraglist_LV_list.setOnItemClickListener((adapterView, view1, position, l) -> {
+            double lat = RecordsList.getInstance().getTopRecords().get(position).getLat();
+            double lng = RecordsList.getInstance().getTopRecords().get(position).getLng();
+            String playerName = RecordsList.getInstance().getTopRecords().get(position).getName();
+            callBack_list.setMapLocation(lat,lng,playerName);
         });
         return view;
     }

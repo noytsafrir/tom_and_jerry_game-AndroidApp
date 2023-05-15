@@ -1,6 +1,6 @@
 package com.example.tom_and_jerry_part1;
 
-import com.example.tom_and_jerry_part1.DB.Record;
+//import com.example.tom_and_jerry_part1.DB.Record;
 
 import java.util.Random;
 
@@ -15,9 +15,9 @@ public class Game_Manager {
     private int lives = 3;
     private int playerPosition;
     private Random randomObstacle;
-    private final String RECORD = "records";
+//    private final String RECORD = "records";
     private int score = 0;
-    private Record record;
+//    private Record record;
 
     private int[][] boardObstacles = new int[ROWS][COLS];
 
@@ -105,9 +105,9 @@ public class Game_Manager {
         score ++;
     }
 
-    public Record getRecord() {
-        return record;
-    }
+//    public Record getRecord() {
+//        return record;
+//    }
 
 //    public void saveDetails(double lng , double lat, String name) {
 //        MyDB myDB;
